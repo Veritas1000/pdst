@@ -8,22 +8,21 @@ from shutil import rmtree
 from setuptools import find_packages, setup
 
 # Package meta-data.
-NAME = 'plextools'
-DESCRIPTION = 'Plex Tools'
-URL = 'https://gitlab.hulahut.xyz/kevin/plextools'
-EMAIL = 'kevin@hulahut.xyz'
+NAME = 'pdst'
+DESCRIPTION = 'PDST - DVR & Sports Tools'
+URL = 'https://github.com/Veritas1000/pdst'
+EMAIL = 'kdion7@gmail.com'
 AUTHOR = 'Kevin Dion'
 REQUIRES_PYTHON = '>=3.6.0'
-VERSION = None  # '0.dev1.0'
+VERSION = None  # in __version__.py
 
 REQUIRED = [
-    'click'  # , 'Pillow', 'fuzzywuzzy', 'python-Levenshtein-wheels', 'numpy', 'scipy',
-    # 'simplejson'
+    'click', 'simplejson', 'fuzzywuzzy', 'Pillow', 'python-Levenshtein-wheels',
+    'numpy', 'scipy', 'unidecode'
 ]
 EXTRAS = {
-    'testing': ['parameterized'],
+    'testing': ['parameterized', 'coverage'],
 }
-
 
 here = os.path.abspath(os.path.dirname(__file__))
 
@@ -42,7 +41,6 @@ if not VERSION:
 else:
     about['__version__'] = VERSION
 
-
 setup(
     name=NAME,
     version=about['__version__'],
@@ -53,15 +51,15 @@ setup(
     author_email=EMAIL,
     python_requires=REQUIRES_PYTHON,
     url=URL,
-    # packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
+    packages=find_packages(exclude=["tests", "*.tests", "*.tests.*", "tests.*"]),
     # If your package is a single module, use this instead of 'packages':
-    py_modules=['plextools'],
+    # py_modules=['pdst'],
 
     entry_points={
-        'console_scripts': ['plextools=plextools.cli:cli'],
+        'console_scripts': ['pdst=pdst.cli:cli'],
     },
     install_requires=REQUIRED,
     extras_require=EXTRAS,
-    # include_package_data=True,
+    include_package_data=True,
     license='MIT',
 )

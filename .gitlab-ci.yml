@@ -1,0 +1,12 @@
+image: "python:3.6-buster"
+
+stages:
+  - test
+
+test:
+  stage: test
+  script:
+    - apt-get update -qy
+    - pip3 install .[testing]
+    - coverage run -m unittest discover
+    - coverage report

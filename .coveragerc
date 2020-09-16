@@ -1,0 +1,13 @@
+[run]
+source = pdst
+
+omit =
+    */__init__.py
+    */__version__.py
+
+[report]
+exclude_lines =
+    pragma: no cover
+    def __repr__
+    raise NotImplementedError
+    except ImageGenerationException

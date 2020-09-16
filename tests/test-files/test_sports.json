@@ -1,0 +1,46 @@
+{
+    "sports": [
+    {
+        "name": "NCAA",
+        "imageRoot": "/fake/images/NCAA",
+        "matches": ["(NCAA|College) (Football|Basketball)"]
+    },
+    {
+        "name": "International",
+        "imageRoot": "/fake/images/National.Flags",
+        "matches": ["World", "Olympics?", "(inter)?national"]
+    },
+    {
+        "name": "Soccer",
+        "imageRoot": "/fake/images/Soccer",
+        "matches": ["Premier League", "UEFA", "Gold Cup", "MLS", "CONCACAF", "Soccer"] 
+    },
+    {
+        "name": "NWSL",
+        "imageRoot": "/fake/images/NWSL"
+    },
+    {
+        "name": "NFL",
+        "imageRoot": "/fake/images/NFL"
+    },
+    {
+        "name": "NHL",
+        "imageRoot": "/fake/images/NHL"
+    },
+    {
+        "name": "Super Rugby",
+        "imageRoot": "/fake/images/Super.Rugby"
+    },
+    {
+        "name": "Formula 1",
+        "image": "/fake/images/f1.png",
+        "matches": ["Formula (One|1)"]
+    },
+    {
+        "name": "Formula E",
+        "image": "/fake/images/formula_e.png",
+        "matches": ["Formula E"]
+    }
+],
+    "plexLibrary": "test-files/testPlexLibrary"
+}

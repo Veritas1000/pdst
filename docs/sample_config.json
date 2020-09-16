@@ -1,0 +1,56 @@
+{
+    "sports": [
+    {
+        "name": "NCAA",
+        "imageRoot": "/media/images/NCAA",
+        "matches": ["NCAA Football", "College Football", "(NCAA|College) (Football|Basketball)"]
+    },
+    {
+        "name": "International",
+        "imageRoot": "/media/images/National.Flags",
+        "dateOverride": "ALWAYS",
+        "matches": [
+            "World", "Olympics?", "(inter)?national",
+            { "match": "UEFA Nations League", "overrideShow": "UEFA Nations League" }
+        ],
+        "background": "blurzoom"
+    },
+    {
+        "name": "NWSL",
+        "imageRoot": "/media/images/NWSL"
+    },
+    {
+        "name": "Premier League",
+        "imageRoot": "/media/images/Soccer/Premier.League"
+    },
+    {
+        "name": "Soccer",
+        "imageRoot": "/media/images/Soccer",
+        "matches": ["UEFA", "Gold Cup", "MLS", "CONCACAF", "Soccer"]
+    },
+    {
+        "name": "NFL",
+        "imageRoot": "/media/images/NFL"
+    },
+    {
+        "name": "NHL",
+        "imageRoot": "/media/images/NHL",
+        "imageTextRegex": "(Game \\d+)"
+    },
+    {
+        "name": "Formula 1",
+        "image": "/media/images/Motorsport/Formula.1/f1_thumb.png",
+        "imageRoot": "/media/images/Motorsport/Formula.1/",
+        "matches": ["Formula (One|1)"]
+    }
+    ],
+    "imageRoot": "/data/images",
+    "thumbnailSize": [600, 340],
+    "fallbackColor": "#111",
+    "videoExtensions": ["mkv", "ts", "mp4"],
+    "imageExtensions": ["png", "jpg", "jpeg"],
+    "createdImageExtension": "png",
+    "plexLibrary": "/data/config/Library/Application Support/Plex Media Server",
+    "moveTarget": "/data/media/video/new-sports",
+    "umask": "002"
+}

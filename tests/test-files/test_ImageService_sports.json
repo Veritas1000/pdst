@@ -1,0 +1,29 @@
+{
+    "sports": [
+    {
+        "name": "Incomplete",
+        "matches": ["Incomplete Sport Def"]
+    },
+    {
+        "name": "No Teams",
+        "matches": ["No Teams"],
+        "imageRoot": "/no/teams/path"
+    },
+    {
+        "name": "Just Image",
+        "matches": ["Just Image"],
+        "image": "/just/sport/image.png"
+    },
+    {
+        "name": "Just Logo",
+        "matches": ["Just Logo"],
+        "logo": "/just/sport/logo.png"
+    },
+    {
+        "name": "Test Teams",
+        "matches": ["Test Teams"],
+        "imageRoot": "/test/team/img/path"
+    }
+],
+    "plexLibrary": "test-files/testPlexLibrary"
+}

@@ -1,0 +1,14 @@
+{
+    "sports": [
+    {
+        "name": "Sport Alpha",
+        "imageRoot": "test-files/logos/plain"
+    }],
+    "thumbnailSize": [600, 340],
+    "fallbackColor": "#111",
+    "videoExtensions": ["mkv", "ts", "mp4"],
+    "imageExtensions": ["png", "jpg", "jpeg"],
+    "createdImageExtension": "png",
+    "plexLibrary": "test-files/testPlexLibrary",
+    "moveTarget": "test-files/out"
+}
