@@ -60,9 +60,14 @@ class MetadataService:
                 metadata.originallyAvailable = datetime.combine(bestDate.date(), metadata.originallyAvailable.time())
                 metadata.season.index = bestDate.year
 
+            sportOverrideShow = sportEntry.overrideShow
+            if sportOverrideShow:
+                newShow = sportOverrideShow if isinstance(sportOverrideShow, str) else sportEntry.name
+                metadata.show.title = newShow
+
             match, score = sportEntry.matchObjectFor(searchString)
             log.debug(f"Match entry: {match}")
-            if match.overrideShow is not None and match.overrideShow:
+            if match is not None and match.overrideShow:
                 newShow = match.overrideShow if isinstance(match.overrideShow, str) else sportEntry.name
                 metadata.show.title = newShow
 
@@ -76,6 +81,6 @@ class MetadataService:
             return True
 
         # DateTimeMode.EOY
-        release = metadata.getOriginalTimestampGuess()
+        release = metadata.release
         if release is not None and release.month == 12 and release.day == 31:
             return True

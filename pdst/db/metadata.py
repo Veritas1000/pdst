@@ -1,4 +1,5 @@
 import re
+from configparser import ConfigParser, ExtendedInterpolation
 from datetime import datetime, timedelta, date, time
 from enum import IntEnum
 
@@ -43,8 +44,8 @@ class BaseMetadata:
             self.title = parsing.removeYears(title)
             self.summary = byKeyOrNone(rowData, 'summary')
 
-            tags = byKeyOrNone(rowData, 'tags_genre')
-            self.tags = tags.split('|') if tags is not None else []
+            genres = byKeyOrNone(rowData, 'genres')
+            self.genres = re.split(r'[|,]\s?', genres) if genres is not None else []
 
             self.year = convertToIntOrNone(rowData, 'year')
             self.index = convertToIntOrNone(rowData, 'index')
@@ -99,10 +100,13 @@ class EpisodeMetadata(BaseMetadata):
                 timestamp = grabBegin.groups(1)[0]
                 self.mediaGrabBegan = datetime.fromtimestamp(int(timestamp))
 
+        if self.release is None:
+            self.release = self.__getOriginalTimestampGuess()
+
         self.season = seasonMetadata
         self.show = showMetadata
 
-    def getOriginalTimestampGuess(self):
+    def __getOriginalTimestampGuess(self):
         # better TIME data
         bestTimesOrder = [self.release, self.mediaGrabBegan, self.recordingStarted, self.added, self.originallyAvailable]
         bestTime = next((item for item in bestTimesOrder if item is not None), None)
@@ -122,12 +126,11 @@ class EpisodeMetadata(BaseMetadata):
             print(f"title={self.title}", file=out)
             print(f"summary={self.summary}", file=out)
 
-            ts = self.getOriginalTimestampGuess()
-            if ts is not None:
-                print(f"release={ts.strftime('%Y-%m-%d')}", file=out)
-                print(f"releaseTime={ts.strftime('%H:%M:%S')}", file=out)
+            if self.release is not None:
+                print(f"release={self.release.strftime('%Y-%m-%d')}", file=out)
+                print(f"releaseTime={self.release.strftime('%H:%M:%S')}", file=out)
 
-            print(f"tags={';'.join(self.tags)}", file=out)
+            print(f"genres={', '.join(self.genres)}", file=out)
             print(f"year={self.year}", file=out)
 
             print(file=out)
@@ -136,7 +139,6 @@ class EpisodeMetadata(BaseMetadata):
             print(f"library_section_id={self.libraryId}", file=out)
             print(f"metadata_type={self.type}", file=out)
             print(f"guid={self.guid}", file=out)
-            print(f"tags_genre={'|'.join(self.tags)}", file=out)
             print(f"duration={int(self.duration / timedelta(milliseconds=1))}", file=out)
             print(f"user_thumb_url={self.thumbUrl}", file=out)
             print(f"originally_available_at={self.originallyAvailable}", file=out)
@@ -161,6 +163,7 @@ class EpisodeMetadata(BaseMetadata):
                 print('[Show]', file=out)
                 print(f"title={self.show.title}", file=out)
                 print(f"summary={self.show.summary}", file=out)
+                print(f"genres={','.join(self.show.genres)}", file=out)
                 print(f"id={self.show.id}", file=out)
                 print(f"user_thumb_url={self.show.thumbUrl}", file=out)
                 print(f"index={self.show.index}", file=out)
@@ -169,24 +172,13 @@ class EpisodeMetadata(BaseMetadata):
 
     @staticmethod
     def fromFile(filename):
-        data = {}
-        showData = {}
-        seasonData = {}
+        config = ConfigParser(interpolation=ExtendedInterpolation())
+        config.read(filename)
 
-        currentData = data
-        with open(filename) as f:
-            for line in f:
-                if '[metadata]' in line:
-                    currentData = data
-                elif '[Season]' in line:
-                    currentData = seasonData
-                elif '[Show]' in line:
-                    currentData = showData
-
-                if '=' in line:
-                    split = line.strip().split('=')
-                    currentData[split[0]] = split[1]
+        episodeData = config['metadata'] if 'metadata' in config else {}
+        seasonData = config['Season'] if 'Season' in config else {}
+        showData = config['Show'] if 'Show' in config else {}
 
         seasonMetadata = BaseMetadata(seasonData)
         showMetadata = BaseMetadata(showData)
-        return EpisodeMetadata(data, seasonMetadata=seasonMetadata, showMetadata=showMetadata)
+        return EpisodeMetadata(episodeData, seasonMetadata=seasonMetadata, showMetadata=showMetadata)

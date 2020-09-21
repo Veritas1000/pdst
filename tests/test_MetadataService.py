@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from parameterized import parameterized
 
-from pdst.Config import DateOverrideMode
+from pdst.Config import DateOverrideMode, SportConfigEntry
 from pdst.MetadataService import MetadataService
 
 
@@ -28,7 +28,7 @@ class TestCliMetadataExport(unittest.TestCase):
     def test_getMetadataForEpisodeFile_overrideDate(self):
         dbMetadata = MagicMock()
         original = datetime(2019, 12, 31, 12, 0, 0)
-        dbMetadata.getOriginalTimestampGuess.return_value = original
+        dbMetadata.release = original
         dbMetadata.originallyAvailable = original
         dbMetadata.mediaGrabBegan = datetime(2020, 8, 1, 12, 0, 0)
 
@@ -46,25 +46,40 @@ class TestCliMetadataExport(unittest.TestCase):
         self.assertEqual(2020, metadata.season.index)
 
     @parameterized.expand([
-        (True, 'Sport Name'),
-        ('New Show', 'New Show'),
-        (None, 'Original Show'),
-        (False, 'Original Show'),
+        ('Original Show', {'name': 'Sport Name'}, 'Original Show'),
+        ('Original Show', {'name': 'Sport Name', 'matches': ['Show']}, 'Original Show'),
+        ('Original Show', {'name': 'Sport Name', 'matches': [{'match': 'Show', 'overrideShow': False}]}, 'Original Show'),
+        ('Original Show', {'name': 'Sport Name', 'matches': ['Show', {'match': 'Not', 'overrideShow': True}]}, 'Original Show'),
+        ('Original Show', {'name': 'Sport Name', 'matches': [{'match': 'Show', 'overrideShow': True}]}, 'Sport Name'),
+        ('Original Show', {'name': 'Sport Name', 'matches': [{'match': 'Show', 'overrideShow': 'Match Show'}]}, 'Match Show'),
+        ('Original Show', {'name': 'Sport Name', 'overrideShow': False}, 'Original Show'),
+        ('Original Show', {'name': 'Sport Name', 'overrideShow': True}, 'Sport Name'),
+        ('Original Show', {'name': 'Sport Name', 'overrideShow': 'Override Show'}, 'Override Show'),
+        ('Original Show', {'name': 'Sport Name', 'overrideShow': 'Override Show',
+          'matches': [{'match': 'Show', 'overrideShow': 'Match Show'}]}, 'Match Show'),
+        ('Original Show', {'name': 'Sport Name', 'overrideShow': 'Override Show',
+          'matches': ['Show', {'match': 'Should not match', 'overrideShow': 'Match Show'}]}, 'Override Show'),
+        ('UEFA Champions League Soccer', {'name': 'UEFA', 'matches': [
+            {'match': 'UEFA Champions', 'overrideShow': 'UEFA Champions League'},
+            {'match': 'UEFA Europa', 'overrideShow': 'UEFA Europa League'},
+            'UEFA'
+            ]}, 'UEFA Champions League'),
+        ('UEFA Something', {'name': 'UEFA', 'overrideShow': 'sport override', 'matches': [
+            {'match': 'UEFA Champions', 'overrideShow': 'UEFA Champions League'},
+            {'match': 'UEFA Europa', 'overrideShow': 'UEFA Europa League'},
+            'UEFA'
+            ]}, 'sport override'),
     ])
-    def test_getMetadataForEpisodeFile_overrideShow(self, overrideShow, expectedShow):
+    def test_getMetadataForEpisodeFile_overrideShow(self, originalShow, sportConfig, expectedShow):
         dbMetadata = MagicMock()
-        dbMetadata.show.title = 'Original Show'
+        dbMetadata.show.title = originalShow
 
         self.mockDao.getMetadataForEpisodeFile.return_value = dbMetadata
 
-        matchEntry = MagicMock()
-        matchEntry.overrideShow = overrideShow
-        sportConfig = MagicMock()
-        sportConfig.name = 'Sport Name'
-        sportConfig.matchObjectFor.return_value = matchEntry, 100
-
+        sportConfig = SportConfigEntry(sportConfig)
         self.mockSportService.getSportFor.return_value = sportConfig
-        metadata = self.service.getMetadataForEpisodeFile('Sport - 2019-12-31 - The Title.ts')
+
+        metadata = self.service.getMetadataForEpisodeFile('Original Show - 2019-12-31 - The Title.ts')
 
         self.assertEqual(expectedShow, metadata.show.title)
 

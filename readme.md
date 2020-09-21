@@ -1,5 +1,8 @@
 # pdst - DVR & Sports Tools
 
+[![pipeline status](https://gitlab.hulahut.xyz/kevin/pdst/badges/master/pipeline.svg)](https://gitlab.hulahut.xyz/kevin/pdst/-/commits/master)
+[![coverage report](https://gitlab.hulahut.xyz/kevin/pdst/badges/master/coverage.svg)](https://gitlab.hulahut.xyz/kevin/pdst/-/commits/master)
+
 A collections of python tools for Plex library management, primarily focused on improving DVR behavior for sports.
 
 ![Example library image](docs/images/champions_league.png "An example of the images in Plex")
@@ -108,7 +111,8 @@ thumbnail generation to look for stuff like 'Game #' and add it to the thumbnail
 
 > Note: I run Plex in an Ubuntu server, and as a result all of my testing thus far has been in that environment. 
 > This *should* work fine in a Windows environment with python 3 installed, but there may be platform issues 
-> I am unaware of that would need to be addressed
+> I am unaware of that would need to be addressed. If you run into problems, please let me know via the 
+> [Plex forums](https://forums.plex.tv/t/release-pdst-dvr-sports-tools/634172)
 
 ## Dependencies
 
@@ -231,6 +235,8 @@ Usage: pdst clean [OPTIONS] PATH...
 
 
 ## TODO: Logos Setup Workflow
+
+Future things I need to add instructions/explanations for
 
 Workflow for setting up [image hints](docs/generate.md#image-generation-filename-hinting) from logos
 

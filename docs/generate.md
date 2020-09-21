@@ -448,6 +448,15 @@ Ex:
 
 * `Charlie_mask$fa4616`
 
+### Stroke hinting
+
+To set a filename hint for a stroke (outline), use the values that you would pass 
+to the `--stroke` option (size in px and color), prefixed with `stroke$` and separated by a `$`.
+
+Ex:
+
+* `Charlie_stroke$7$fff` - will draw a 7px white outline
+
 ### Background filename hinting
 
 To set a filename hint for a particular background pattern, use the value that you would pass 

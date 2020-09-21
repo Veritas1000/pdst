@@ -26,6 +26,7 @@ or by setting up an environment variable `PDST_CFG` pointing to the config file 
     },
     {
         "name": "Premier League",
+        "overrideShow": true,
         "imageRoot": "/media/images/Soccer/UEFA/Premier.League",
         "logo": "/media/images/Soccer/Premier_League_logo.png"
     },
@@ -88,24 +89,21 @@ match `Formula.1`, `formula_1`, and `FORMULA-1`. The match strings are treated m
 matches in that they are not expected to be the alone, so 'Formula 1' would match against the longer 
 string 'FIA Formula 1 Racing'.
 
-### `matches`
+### `overrideShow`
 
-An optional collection of strings or objects that will be used to match for the sport instead of `name`.
+`overrideShow` can go at either the sport level or in a [match object](#match-object).
 
-For simple string matches, basic regex features are supported, and like `name`, searches are done case-insensitive 
-and any spaces in the string will also match the common alternative delimiters.
+It should be a string or `true`/`false` (the default if not present is `false`). 
 
-Using an object allows for more specialized handling by allowing you to override the show name for matched episodes.
+If set to `true`, any episode for this sport will have its show title set to the sport name.
 
-A match object expects two fields: `match` and `overrideShow`. The `match` field should be a string just as you 
-would use for a plain string `match`. `overrideShow` should be a string, which will be used to *override* the show 
-name for any episode that matches the match string. 
+If set to a string, any episode for this sport will have its show title set to that string.
 
 This can be useful if a given sport might have EPG airings with inconsistent show names. For example, in my EPG data, 
 there were multiple separate 'shows' that I wanted to combine under a single Plex show: 'UEFA Nations League', 
 'UEFA Nations League Soccer', 'and UEFA Nations League Fútbol'. By using the `overrideShow` option in the match object, 
-each of those shows' episodes will have its show name consistently set to 'UEFA Nations League' (when performing 
-a meatadata export or move)
+each of those shows' episodes will have its show name consistently set to 'UEFA Nations League' when performing 
+a meatadata export or move
 
 ### `dateOverride`
 
@@ -143,6 +141,26 @@ Set a sport-level [background style hint](generate.md#background-filename-hintin
 Optional regex that can be used to extract text from an episode title to use when generating the image.
 
 The matching group (if any) is used in thumbnail generation as if it were passed in with a [`--text` argument](generate.md#--text) 
+
+### `matches`
+
+An optional collection of strings or objects that will be used to match for the sport instead of the sport `name`.
+
+For simple string matches, basic regex features are supported, and like `name`, searches are done case-insensitive 
+and any spaces in the string will also match the common alternative delimiters.
+
+#### Match Object
+
+Using an object allows for more specialized handling by allowing you to override some behavior for just some matches.
+
+A match object supports three fields: `match`, `overrideShow`, and `rawRegex`. 
+
+The `match` field should be a string just as you would use for a plain string `match`. 
+
+`overrideShow` supports the same types as at the sport level, but will override any value set at the sport level for 
+episodes that match to *just this match object*
+
+`rawRegex` can be used to provide a more complex, explicit regex to use instead of `match`. Use with caution.
 
 ## How sports are matched
 

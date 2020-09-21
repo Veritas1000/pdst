@@ -77,6 +77,8 @@ class SportConfigEntry:
         self.dateOverride = DateOverrideMode.fromString(sportEntry['dateOverride']) if 'dateOverride' in sportEntry \
             else DateOverrideMode.EOY
 
+        self.overrideShow = sportEntry['overrideShow'] if 'overrideShow' in sportEntry else False
+
         self.imageTextRegex = sportEntry['imageTextRegex'] if 'imageTextRegex' in sportEntry else None
         self.background = sportEntry['background'] if 'background' in sportEntry else None
 
@@ -155,7 +157,7 @@ class SportMatchEntry:
 
     def __init__(self, configEntry):
         self.matchRegex = None
-        self.overrideShow = None
+        self.overrideShow = False
 
         p = re.compile(r"\s+", re.IGNORECASE)
 
@@ -167,7 +169,7 @@ class SportMatchEntry:
                 self.matchRegex = configEntry['rawRegex']
 
             if 'overrideShow' in configEntry:
-                self.overrideShow = configEntry['overrideShow']
+                self.overrideShow = configEntry['overrideShow'] or False
 
         else:
             self.matchRegex = convertSpacesToRegex(configEntry)

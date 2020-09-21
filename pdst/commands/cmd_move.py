@@ -29,7 +29,6 @@ def moveAssociatedFiles(ctx, videoPath):
         ctx.vlog(f"Creating destination directories: {destinationDir}")
         os.makedirs(destinationDir)
 
-    renamed = filetools.getBetterFilename(metadata)
     showPosterFile = os.path.join(newRootPath, newShowDirName, 'poster.jpg')
     if not os.path.exists(showPosterFile):
         ctx.vlog(f"Destination show does not have an existing poster")
@@ -40,6 +39,7 @@ def moveAssociatedFiles(ctx, videoPath):
         else:
             ctx.vlog(f"{existingThumb} doesn't seem to exist?")
 
+    renamed = filetools.getMoveDestinationFilename(videoPath, metadata, destinationDir)
     for filePath in filetools.getPlexAssociatedFiles(videoPath):
         thisExt = os.path.splitext(filePath)[1]
         if thisExt[1:] not in ctx.skipExt:

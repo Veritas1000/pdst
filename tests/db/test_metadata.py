@@ -14,7 +14,7 @@ class TestMetadata(unittest.TestCase):
                 'guid': 'aGuIdABCDEF123',
                 'title': 'Test Title',
                 'summary': 'Summary',
-                'tags_genre': 'Tag A|Tag B',
+                'genres': 'Tag A|Tag B',
                 'year': 2020,
                 'duration': 9000000,
                 'user_thumb_url': 'upload://posters/383a16a39f9e3302e4608572a7ee14f3d103ee17.jpg',
@@ -45,8 +45,8 @@ class TestMetadata(unittest.TestCase):
 
         self.assertEqual('Test Title', metadata.title)
         self.assertEqual('Summary', metadata.summary)
-        self.assertIn('Tag A', metadata.tags)
-        self.assertIn('Tag B', metadata.tags)
+        self.assertIn('Tag A', metadata.genres)
+        self.assertIn('Tag B', metadata.genres)
         self.assertEqual(2020, metadata.year)
         self.assertEqual('deadbeef123', metadata.hash)
         self.assertEqual(timedelta(hours=2.5), metadata.duration)
@@ -71,7 +71,7 @@ class TestMetadata(unittest.TestCase):
                     'guid': 'anotherGuiD',
                     'title': 'The Show',
                     'summary': 'Show Summary',
-                    'tags_genre': 'Tag A|Tag B',
+                    'genres': 'Tag A|Tag B',
                     'year': 2020,
                     'duration': None,
                     'index': None,
@@ -91,6 +91,8 @@ class TestMetadata(unittest.TestCase):
 
         self.assertEqual(8, readMetadata.show.id)
         self.assertEqual('The Show', readMetadata.show.title)
+        self.assertIn('Tag A', readMetadata.show.genres)
+        self.assertIn('Tag B', readMetadata.show.genres)
 
         os.remove(filePath)
 
@@ -115,7 +117,7 @@ class TestMetadata(unittest.TestCase):
         metadata = EpisodeMetadata(data)
 
         expectedDatetime = datetime.strptime(expected, self.datetime_iso_format)
-        self.assertEqual(expectedDatetime, metadata.getOriginalTimestampGuess())
+        self.assertEqual(expectedDatetime, metadata.release)
 
     def test_Metadata_getTimestamp_releaseOverride(self):
         durationMs = timedelta(hours=2) / timedelta(milliseconds=1)
@@ -130,4 +132,4 @@ class TestMetadata(unittest.TestCase):
         metadata = EpisodeMetadata(data)
 
         expectedDatetime = datetime.strptime('2020-08-02 09:10:11', self.datetime_iso_format)
-        self.assertEqual(expectedDatetime, metadata.getOriginalTimestampGuess())
+        self.assertEqual(expectedDatetime, metadata.release)

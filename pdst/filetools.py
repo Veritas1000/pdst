@@ -1,6 +1,7 @@
 import glob
 import logging
 import os
+from datetime import datetime, timedelta
 
 from unidecode import unidecode
 
@@ -8,16 +9,18 @@ from pdst import parsing
 
 log = logging.getLogger(__name__)
 
+FILE_DATETIME_FORMAT = '%Y-%m-%d %H %M %S'
+
 
 def getBetterFilename(metadata):
     showTitle = None
     if metadata.show is not None:
         showTitle = metadata.show.title
 
-    timestamp = metadata.getOriginalTimestampGuess()
+    timestamp = metadata.release
     timeString = None
     if timestamp is not None:
-        timeString = timestamp.strftime('%Y-%m-%d %H %M %S')
+        timeString = timestamp.strftime(FILE_DATETIME_FORMAT)
 
     parts = [p for p in [showTitle, timeString, metadata.title] if p is not None]
     filename = ' - '.join(parts)
@@ -26,6 +29,35 @@ def getBetterFilename(metadata):
     unaccented = convertUnicodeChars(cleaned)
 
     return unaccented
+
+
+def getMoveDestinationFilename(originalFilename, metadata, destinationDir):
+    originalBase = os.path.basename(originalFilename)
+
+    destNames = [os.path.basename(f) for f in os.scandir(destinationDir)]
+    matchingTimestamp = True
+
+    while matchingTimestamp:
+        matchingTimestamp = False
+        destFilename = getBetterFilename(metadata)
+        destTs = getTimestampFromFilename(destFilename)
+
+        for checkFile in destNames:
+            checkTs = getTimestampFromFilename(checkFile)
+            if checkTs == destTs and originalBase != checkFile:
+                matchingTimestamp = True
+                metadata.release = metadata.release + timedelta(seconds=1)
+
+    return destFilename
+
+
+def getTimestampFromFilename(filename):
+    for part in filename.split(' - '):
+        try:
+            ts = datetime.strptime(part, FILE_DATETIME_FORMAT)
+            return ts
+        except ValueError:
+            continue
 
 
 def convertUnicodeChars(inStr):

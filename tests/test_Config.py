@@ -51,8 +51,8 @@ class TestConfig(unittest.TestCase):
         self.assertEqual(expectedMatchRegex, entry.matchRegex)
 
     @parameterized.expand([
-        ('match', None),
-        ({'match': 'match'}, None),
+        ('match', False),
+        ({'match': 'match'}, False),
         ({'match': 'match', 'overrideShow': True}, True),
         ({'match': 'match', 'overrideShow': 'Another Show'}, 'Another Show'),
     ])

@@ -5,7 +5,7 @@ from PIL import Image, ImageColor, ImageDraw, ImageFilter
 from pdst.image.DrawConfig import LogoDrawConfig
 from pdst.image.compositor import SimpleCompositor, SingleImageCompositor
 from pdst.image.drawing import drawLayers
-from pdst.image.spec import LayerEffects, LayerSpec, LayerGroupSpec, DropShadowSpec
+from pdst.image.spec import LayerEffects, LayerSpec, LayerGroupSpec
 from pdst.image.util import calculateTopLeftCentered
 
 log = logging.getLogger(__name__)
@@ -40,9 +40,7 @@ class ImageGenerator:
 
         specs = []
         for i in range(0, compositor.numParts):
-            imagePartSize = compositor.getPartFullSize(i)
-            safeBounds = compositor.getPartSafeBounds(i)
-            logoGroup = self.__drawLogoAndBackground(compositor.partSpecs[i], imagePartSize, safeBounds)
+            logoGroup = self.__drawLogoAndBackground(compositor, i)
             mask = compositor.getPartMask(i)
             logoGroup.alphaMask = mask
             logoGroup.offset = compositor.getPartTopLeft(i)
@@ -51,10 +49,11 @@ class ImageGenerator:
         outImage = drawLayers(baseImage, specs)
         return outImage
 
-    def __drawLogoAndBackground(self, imageSpec, fullBounds, safeBounds=None):
+    def __drawLogoAndBackground(self, compositor, partNum):
         """Returns an Image of size fullBounds with the logo and its background"""
-        if safeBounds is None:
-            safeBounds = ((0, 0), fullBounds)
+        imageSpec = compositor.partSpecs[partNum]
+        fullBounds = compositor.getPartFullSize(partNum)
+        safeBounds = compositor.getPartSafeBounds(partNum)
 
         # draw logo centered in the safe bounds
         logoSafeW = safeBounds[1][0]
@@ -63,11 +62,7 @@ class ImageGenerator:
         log.debug(f"safe width/height: {logoSafeW},{logoSafeH}")
 
         logoBounds = (int(logoSafeW * 0.8), int(logoSafeH * 0.75))
-        logoCenterX = int(safeBounds[0][0] + (logoSafeW / 2))
-        logoCenterY = int(safeBounds[0][1] + (logoSafeH / 2))
-
-        log.debug(f"Logo center X/Y: {logoCenterX},{logoCenterY}")
-        logoCenterXY = (logoCenterX, logoCenterY)
+        logoCenterXY = compositor.getPartLogoCenter(partNum)
 
         logoDrawCfg = LogoDrawConfig(imageSpec, logoBounds, logoCenterXY, self.config.fallbackColor)
 

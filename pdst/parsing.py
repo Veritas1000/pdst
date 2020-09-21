@@ -11,7 +11,8 @@ DELIMITER_MATCH = r"[\s\.\-_]"
 COLOR_HEX_MATCH = r"(?:[a-f0-9]{3}){1,2}"
 BG_PATTERN_MATCH = r"bg\$([0-9a-z.]+)"
 MASK_MATCH = rf"mask\$({COLOR_HEX_MATCH})"
-DELIM_HINT_MATCH = rf"{DELIMITER_MATCH}(?:{COLOR_HEX_MATCH}i?|{BG_PATTERN_MATCH}|{MASK_MATCH})"
+STROKE_MATCH = rf"stroke\$(\d+)\$({COLOR_HEX_MATCH})"
+DELIM_HINT_MATCH = rf"{DELIMITER_MATCH}(?:{COLOR_HEX_MATCH}i?|{BG_PATTERN_MATCH}|{MASK_MATCH}|{STROKE_MATCH})"
 
 
 def removeBadFilenameChars(original):
@@ -245,6 +246,17 @@ def getMaskHint(filename):
         return None
 
     return match[1]
+
+
+def getStrokeHint(filename):
+    """Parses out a mask hint from the filename"""
+    pattern = re.compile(rf"(?:{DELIMITER_MATCH}{STROKE_MATCH}{DELIMITER_MATCH})", re.IGNORECASE)
+    match = pattern.search(filename)
+
+    if match is None:
+        return None, None
+
+    return int(match[1]), match[2]
 
 
 def isTeamsString(inStr):

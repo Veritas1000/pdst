@@ -14,6 +14,11 @@ class ImageSpec:
         self.bg = bg
         self.invert = invert
 
+        if strokeSpec is None and imageFile is not None:
+            size, color = parsing.getStrokeHint(imageFile)
+            if size is not None and color is not None:
+                strokeSpec = StrokeSpec(size, color)
+
         self.strokeSpec = strokeSpec
 
         if maskSpec is None and imageFile is not None:

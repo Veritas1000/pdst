@@ -71,6 +71,7 @@ class TestMetadata(unittest.TestCase):
         ('Team_One_123456_fff_bg$solid_222.png', 'Team_One'),
         ('Team_One_123456_fff_bg$solid_222_nope.png', 'Team_One_123456_fff_bg$solid_222_nope'),
         ('Team_One_123456_fff_mask$0f0.png', 'Team_One'),
+        ('Team_One_123456_fff_stroke$1$0f0.png', 'Team_One'),
     ])
     def test_cleanImageHints(self, input, expected):
         teamName = parsing.cleanImageHints(input)
@@ -90,6 +91,8 @@ class TestMetadata(unittest.TestCase):
         ('Some_Name_ffaa88_bg$solid_Q.png', False),
         ('Some_Name_ffaa88_mask$fff.png', True),
         ('Some_Name_ffaa88_mask$fff_Q.png', False),
+        ('Some_Name_ffaa88_stroke$12$fff.png', True),
+        ('Some_Name_ffaa88_stroke$12$fff_Q.png', False),
     ])
     def test_hasHints(self, input, expected):
         found = parsing.hasHints(input)
@@ -196,6 +199,17 @@ class TestMetadata(unittest.TestCase):
     def test_getMaskHint(self, filename, expectedMaskHex):
         out = parsing.getMaskHint(filename)
         self.assertEqual(expectedMaskHex, out)
+
+    @parameterized.expand([
+        ('/images/Some_Name_135acf.png', None, None),
+        ('/images/Some_Name_135acf_bg$stripe1.xyz', None, None),
+        ('/images/Some_Name_135acf_stroke$1$000.xyz', 1, '000'),
+        ('/images/Some_Name_135acf_stroke$12$abc_ffaaff.xyz', 12, 'abc'),
+    ])
+    def test_getStrokeHint(self, filename, expectedSize, expectedStrokeHex):
+        outSize, outColor = parsing.getStrokeHint(filename)
+        self.assertEqual(expectedSize, outSize)
+        self.assertEqual(expectedStrokeHex, outColor)
 
     @parameterized.expand([
         ('not teams string', False),

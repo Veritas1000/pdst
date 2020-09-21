@@ -25,6 +25,7 @@ def mocked_glob(in_glob):
     print(new_glob)
     return iglob(new_glob)
 
+
 class TestCliMove(unittest.TestCase):
 
     def setUp(self):

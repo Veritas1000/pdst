@@ -52,6 +52,15 @@ class BaseCompositor:
     def getPartTopLeft(self, num):
         raise NotImplementedError()
 
+    def getPartLogoCenter(self, num):
+        safeBounds = self.getPartSafeBounds(num)
+        logoSafeW = safeBounds[1][0]
+        logoSafeH = safeBounds[1][1]
+        logoCenterX = int(safeBounds[0][0] + (logoSafeW / 2))
+        logoCenterY = int(safeBounds[0][1] + (logoSafeH / 2))
+        logoCenterXY = (logoCenterX, logoCenterY)
+        return logoCenterXY
+
     def __initFont(self, text):
         fontSize = self.size[1] // 5
         fontFile = filetools.getResourceFilePath('fonts/SourceSansPro-Bold.ttf')
@@ -111,10 +120,15 @@ class SimpleCompositor(BaseCompositor):
         self.dividerLX = dividerLX
         self.dividerRX = dividerRX
         self.partSize = (dividerRX, h)
+
+        # TODO: this is a magic number - figure out how to calculate this for arbitrary dividers
+        # unsafeFactor = 1.0 - (dividerPct / 100)
         self.logoUnsafeX = int(divider_size * 0.7)
+
         self.logoSafeW = dividerRX - self.logoUnsafeX
 
     def getPartFullSize(self, num):
+        log.debug(f"Part {num} full size: {self.partSize}")
         return self.partSize
 
     def getPartSafeBounds(self, num):
@@ -124,27 +138,49 @@ class SimpleCompositor(BaseCompositor):
         return topL, (self.logoSafeW, safeH)
 
     def getPartMask(self, num):
+        poly = self.__getPartPoly(num)
+        mask = Image.new('L', self.partSize, color=0)
+        draw = ImageDraw.Draw(mask)
+        draw.polygon(poly, fill=255)
+
+        return mask
+
+    def __getPartPoly(self, num):
         topL = (num * self.divider_size, 0)
         topR = (self.dividerRX, 0)
         botR = (self.dividerLX + (num * self.divider_size), self.size[1])
         botL = (0, self.size[1])
 
-        poly = [topL, topR, botR, botL]
-        mask = Image.new('L', self.partSize, color=0)
-        draw = ImageDraw.Draw(mask)
-        draw.polygon(poly, fill=255)
-
-        # poly = [topL, topR, botR, botL]
-        # partTL = self.getPartTopLeft(num)
-        # adjusted = []
-        # for pt in poly:
-        #     adjusted.append((pt[0] + partTL[0], pt[1] + partTL[1]))
-        #
-        # mask = Image.new('L', self.size, color=0)
-        # draw = ImageDraw.Draw(mask)
-        # draw.polygon(adjusted, fill=255)
-
-        return mask
+        return [topL, topR, botR, botL, topL]
 
     def getPartTopLeft(self, num):
         return num * self.dividerLX, 0
+
+    # def getPartLogoCenter(self, num):
+        # poly = self.__getPartPoly(num)
+        # _cx = 0
+        # _cy = 0
+        # _a = 0
+        #
+        # for i in range(0, len(poly) - 1):
+        #     _xi = poly[i][0]
+        #     _yi = poly[i][1]
+        #     _xi1 = poly[i+1][0]
+        #     _yi1 = poly[i+1][1]
+        #
+        #     _z = (_xi * _yi1) - (_xi1 * _yi)
+        #
+        #     _cx += (_xi + _xi1) * _z
+        #     _cy += (_yi + _yi1) * _z
+        #     _a += _z
+        #
+        # A = _a / 2
+        # cx = (1 / (6 * A)) * _cx
+        # cy = (1 / (6 * A)) * _cy
+        #
+        # m = pow(-1, num)
+        # extraOffset = (self.dividerLX / 2)
+        # print(extraOffset)
+        # cx -= m * extraOffset
+        #
+        # return int(cx), int(cy)

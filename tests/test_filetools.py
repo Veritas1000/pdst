@@ -1,7 +1,7 @@
 import os
 import unittest
 from datetime import datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from parameterized import parameterized
 
@@ -16,7 +16,7 @@ class TestMetadata(unittest.TestCase):
 
         metadata = MagicMock()
         metadata.show = mockShow
-        metadata.getOriginalTimestampGuess.return_value = None
+        metadata.release = None
         metadata.title = 'Show Title'
 
         name = filetools.getBetterFilename(metadata)
@@ -26,7 +26,7 @@ class TestMetadata(unittest.TestCase):
     def test_getBetterFilename_no_show_no_ts(self):
         metadata = MagicMock()
         metadata.show = None
-        metadata.getOriginalTimestampGuess.return_value = None
+        metadata.release = None
         metadata.title = 'Show Title'
 
         name = filetools.getBetterFilename(metadata)
@@ -39,7 +39,7 @@ class TestMetadata(unittest.TestCase):
 
         metadata = MagicMock()
         metadata.show = mockShow
-        metadata.getOriginalTimestampGuess.return_value = datetime(2020, 1, 2, 3, 4, 5)
+        metadata.release = datetime(2020, 1, 2, 3, 4, 5)
         metadata.title = 'Show Title'
 
         name = filetools.getBetterFilename(metadata)
@@ -52,7 +52,7 @@ class TestMetadata(unittest.TestCase):
 
         metadata = MagicMock()
         metadata.show = mockShow
-        metadata.getOriginalTimestampGuess.return_value = None
+        metadata.release = None
         metadata.title = 'Show? Title| and* some" [other] stuff/\\%<>\''
 
         name = filetools.getBetterFilename(metadata)
@@ -87,3 +87,56 @@ class TestMetadata(unittest.TestCase):
         output = filetools.getRealThumbPath(metadata)
         expected_osPathSep_fixed = os.path.sep.join(expected.split('/')) if expected is not None else None
         self.assertEqual(expected_osPathSep_fixed, output)
+
+    @parameterized.expand([
+        ('Show - 2020-01-01 12 00 00 - Title', '2020-01-01 12:00:00'),
+        ('2020-01-01 12 00 00 - Title', '2020-01-01 12:00:00'),
+    ])
+    def test_getTimestampFromFilename(self, inFilename, expected):
+        expectedDt = datetime.strptime(expected, '%Y-%m-%d %H:%M:%S')
+
+        outDt = filetools.getTimestampFromFilename(inFilename)
+        self.assertEqual(expectedDt, outDt)
+
+    @parameterized.expand([
+        ('File.txt',
+         {'show': 'Show', 'title': 'Title',
+          'release': datetime.strptime('2020-01-01 12:00:00', '%Y-%m-%d %H:%M:%S')},
+         [], 'Show - 2020-01-01 12 00 00 - Title'),
+        ('File.txt',
+         {'show': 'Show', 'title': 'Title',
+          'release': datetime.strptime('2020-01-01 12:00:00', '%Y-%m-%d %H:%M:%S')},
+         ['Show - 2020-01-01 12 00 00 - Another.mkv'],
+         'Show - 2020-01-01 12 00 01 - Title'),
+        ('Show - 2020-01-01 12 00 00 - Original.mkv',
+         {'show': 'Show', 'title': 'Title',
+          'release': datetime.strptime('2020-01-01 12:00:00', '%Y-%m-%d %H:%M:%S')},
+         ['Show - 2020-01-01 12 00 00 - Original.mkv'],
+         'Show - 2020-01-01 12 00 00 - Title'),
+        ('Show - 2020-01-01 12 00 00 - Original.mkv',
+         {'show': 'Show', 'title': 'Title',
+          'release': datetime.strptime('2020-01-01 12:00:00', '%Y-%m-%d %H:%M:%S')},
+         ['Show - 2020-01-01 12 00 00 - Original.mkv',
+          'Show - 2020-01-01 12 00 00 - Other.mkv'],
+         'Show - 2020-01-01 12 00 01 - Title'),
+        ('File.txt',
+         {'show': 'Show', 'title': 'Title',
+          'release': datetime.strptime('2020-01-01 12:00:00', '%Y-%m-%d %H:%M:%S')},
+         ['Show - 2020-01-01 12 00 00 - Another.mkv',
+          'Show - 2020-01-01 12 00 01 - Another2.mkv'],
+         'Show - 2020-01-01 12 00 02 - Title'),
+    ])
+    @patch('pdst.filetools.os.scandir')
+    def test_getMoveDestinationFilename(self, originalFile, metadata, otherFilesInDestination, expectedName, scanMock):
+        destinationPath = '/a/fake/path'
+        scanMock.return_value = otherFilesInDestination
+
+        metadataObj = MagicMock()
+        mockShow = MagicMock()
+        mockShow.title = metadata['show']
+        metadataObj.show = mockShow
+        metadataObj.title = metadata['title']
+        metadataObj.release = metadata['release']
+
+        output = filetools.getMoveDestinationFilename(originalFile, metadataObj, destinationPath)
+        self.assertEqual(expectedName, output)

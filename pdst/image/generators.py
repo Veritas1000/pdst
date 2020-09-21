@@ -308,3 +308,4 @@ class FillLogoGenerator(BaseBackgroundGenerator):
         super().fillBg(baseImage, drawConfig.getPrimaryColorHex())
         drawConfig.resizeFunction = fillBounds
         drawConfig.logoBounds = baseImage.size
+        drawConfig.logoCenterXY = (baseImage.size[0] // 2, baseImage.size[1] // 2)

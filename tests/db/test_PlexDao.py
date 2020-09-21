@@ -20,8 +20,8 @@ class TestPlexDao(unittest.TestCase):
         self.assertEqual(3, metadata.id)
         self.assertEqual('Team Alpha vs. Team Bravo', metadata.title)
         self.assertEqual('A match between Team Alpha and Team Bravo', metadata.summary)
-        self.assertIn('Sport', metadata.tags)
-        self.assertIn('Alpha', metadata.tags)
+        self.assertIn('Sport', metadata.genres)
+        self.assertIn('Alpha', metadata.genres)
         self.assertEqual('abc123', metadata.hash)
 
         self.assertEqual(MetadataType.SEASON, metadata.season.type)
