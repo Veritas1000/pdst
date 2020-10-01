@@ -1,8 +1,10 @@
 import unittest
+from unittest.mock import patch
 
 from parameterized import parameterized
 
 from pdst.image import util
+from pdst.image.spec import ImageSpec
 
 
 class TestImageService(unittest.TestCase):
@@ -71,3 +73,62 @@ class TestImageService(unittest.TestCase):
         self.assertEqual(color[1], out[1])
         self.assertEqual(color[2], out[2])
         self.assertEqual(expectedAlpha, out[3])
+
+    @parameterized.expand([
+        (['fff'], ['00f'], 'fff'),
+        (['00f', 'f00'], ['00f'], 'f00'),
+        (['fff'], [], 'fff'),
+    ])
+    def test_getAcceptableColor_basic(self, specColors, otherColors, expected):
+        imageSpec = ImageSpec(None, isLogo=True, colors=specColors)
+
+        outColor = util.getAcceptableColor(imageSpec, otherColors)
+
+        self.assertEqual(expected, outColor)
+
+    @parameterized.expand([
+        (['00f'], ['00f'], ['f00'], 'f00'),
+        (['00f'], ['00f'], ['00f'], 'eee'),
+        (['00f'], ['00f', 'eee', 'fff', '111', '000'], ['00f'], None),
+    ])
+    @patch('pdst.analysis.getAllColors')
+    def test_getAcceptableColor_analyzed(self, specColors, otherColors, analyzeColors, expected, mockAnalyze):
+        imageSpec = ImageSpec(None, isLogo=True, colors=specColors)
+        mockAnalyze.return_value = analyzeColors, []
+
+        outColor = util.getAcceptableColor(imageSpec, otherColors)
+
+        self.assertEqual(expected, outColor)
+
+    @parameterized.expand([
+        (['00f'], ['f00'], 'f00'),
+        (['00f'], ['00f', 'f00'], 'f00'),
+    ])
+    def test_changeSimilarBgColors_basic(self, spec1Colors, spec2Colors, expectedSpec2Color):
+        spec1 = ImageSpec(None, isLogo=True, colors=spec1Colors)
+        spec2 = ImageSpec(None, isLogo=True, colors=spec2Colors)
+
+        imageSpecs = [spec1, spec2]
+        util.changeSimilarBgColors(imageSpecs)
+
+        self.assertEqual(spec1Colors[0], spec1.colors[0])
+        self.assertEqual(expectedSpec2Color, spec2.colors[0])
+
+    @parameterized.expand([
+        (['00f'], ['00f'], 'eee', False),
+        (['00f'], ['f00'], 'f00', True),
+    ])
+    @patch('pdst.analysis.getAllColors')
+    def test_changeSimilarBgColors_invert(self, spec1Colors, spec2Colors, expectedSpec2Color, expectedSpec2Invert, mockGetAllColors):
+        spec1 = ImageSpec(None, isLogo=True, colors=spec1Colors, invert=True)
+        spec2 = ImageSpec(None, isLogo=True, colors=spec2Colors, invert=True)
+
+        mockGetAllColors.return_value = spec2Colors, []
+
+        imageSpecs = [spec1, spec2]
+        util.changeSimilarBgColors(imageSpecs)
+
+        self.assertEqual(True, spec1.invert)
+
+        self.assertEqual(expectedSpec2Color, spec2.colors[0])
+        self.assertEqual(expectedSpec2Invert, spec2.invert)

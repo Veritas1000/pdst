@@ -2,6 +2,7 @@ import logging
 
 from PIL import Image, ImageColor, ImageDraw, ImageFilter
 
+from pdst.image import util
 from pdst.image.DrawConfig import LogoDrawConfig
 from pdst.image.compositor import SimpleCompositor, SingleImageCompositor
 from pdst.image.drawing import drawLayers
@@ -17,6 +18,7 @@ class ImageGenerator:
         self.config = config
         self.thumbnailSize = config.thumbnailSize
         self.fallbackColor = config.fallbackColor
+        self.preventSimilarColors = config.preventSimilarColors
 
     def generateImage(self, compositeSpec, imageSpecs):
         numImages = len(imageSpecs)
@@ -25,6 +27,9 @@ class ImageGenerator:
         elif numImages == 1:
             compositor = SingleImageCompositor(compositeSpec, imageSpecs[0])
         elif numImages == 2:
+            if self.preventSimilarColors:
+                util.changeSimilarBgColors(imageSpecs)
+
             compositor = SimpleCompositor(compositeSpec, imageSpecs)
         else:
             raise NotImplementedError("Don't know how to draw a composition with more than 2 images!")

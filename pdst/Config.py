@@ -45,6 +45,8 @@ class Config:
         self.umask = int(umaskStr, 8)
         os.umask(self.umask)
 
+        self.preventSimilarColors = self.__getConfigOrDefault('preventSimilarColors', True)
+
     def __getConfigOrDefault(self, configKey, default):
         if self.rawConfig is not None and configKey in self.rawConfig:
             return self.rawConfig[configKey]

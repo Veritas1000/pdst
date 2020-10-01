@@ -51,7 +51,8 @@ class ImageMatcher:
                 seasonDir = bestSecondMatch[0] if self.__isGreatMatch(bestSecondMatch) else None
 
         else:
-            # refParentDir is probably sport, can probably ignore refGrandparentDir and we don't know season (or there is none)
+            # refParentDir is probably sport, can probably ignore refGrandparentDir and we don't
+            # know season (or there is none)
             sportDir = pMatch[0] if self.__isGoodMatch(pMatch) else None
 
         log.debug(f"Returning (sportDir = {sportDir}, seasonDir = {seasonDir})")
@@ -127,14 +128,31 @@ class ImageMatcher:
 
     def __extractImageMatch(self, searchTarget, images):
         bestMatch = None
+        bestCleaned = None
         bestScore = 0
+
         for dirtyFilename in images:
             cleaned = parsing.cleanImageHints(dirtyFilename)
             score = fuzz.partial_ratio(searchTarget, cleaned)
+            # log.debug(f'{cleaned} partial_ratio {score}')
             if score > bestScore:
                 bestScore = score
                 bestMatch = dirtyFilename
+                bestCleaned = cleaned
+                # log.debug(f'current best is: {bestCleaned}')
+            elif score == bestScore:
+                # log.debug('same score as current best, comparing token_set_ratio as well')
+                thisTokenSetScore = fuzz.token_set_ratio(searchTarget, cleaned)
+                otherTokenSetScore = fuzz.token_set_ratio(searchTarget, bestCleaned)
+                # log.debug(f'{cleaned} token_set_ratio {thisTokenSetScore}')
+                # log.debug(f'{bestCleaned} token_set_ratio {otherTokenSetScore}')
+                if thisTokenSetScore > otherTokenSetScore:
+                    bestScore = score
+                    bestMatch = dirtyFilename
+                    bestCleaned = cleaned
+                    # log.debug(f'current best is: {bestCleaned}')
 
+        # log.debug(f'best match found: {bestMatch}')
         return bestMatch, bestScore
 
     def getLogo(self, teamSpec):

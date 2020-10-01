@@ -3,7 +3,7 @@ import logging
 from PIL import ImageColor, Image
 
 from pdst import parsing, analysis
-from pdst.image import generators
+from pdst.image import generators, util
 from pdst.image.spec import StrokeSpec, ColorOverlaySpec
 from pdst.image.util import fitToBounds, getLightness
 
@@ -56,18 +56,12 @@ class LogoDrawConfig:
             log.debug(f"NO IMAGE! using {self.defaultColor}")
             return [self.defaultColor]
         else:
-            colorHints = parsing.getAllColorsFromFilename(imagePath)
-            if colorHints is not None:
-                log.debug(f"Got color hints: {colorHints}")
-                return colorHints
+            foundColors = util.getColorsForImage(imagePath)
+            if foundColors is not None and len(foundColors) > 0:
+                return foundColors
             else:
-                log.debug("filename parsing failed")
-                (foundColors, pcts) = analysis.getAllColors(imagePath)
-                if len(foundColors) > 0:
-                    return foundColors
-                else:
-                    log.debug("didn't get any colors from analyzing image")
-                    return [self.defaultColor]
+                log.debug("didn't get any colors from analyzing image")
+                return [self.defaultColor]
 
     def getColorHex(self, position):
         if position >= len(self.colors):

@@ -42,8 +42,9 @@ class TestImageService(unittest.TestCase):
         self.assertEqual('/just/sport/image.png', imageSpecs[0].imageFile)
         self.assertEqual(False, imageSpecs[0].isLogo)
 
-    def test_getImageSpecsForFilename_noTeams_sportLogo(self):
-
+    @patch('pdst.image.spec.util.getColorsForImage')
+    def test_getImageSpecsForFilename_noTeams_sportLogo(self, mockGetColors):
+        mockGetColors.return_value = []
         imageSpecs = self.service.getImageSpecsForFilename('/Just.Logo/Test Sport - 2020-02-02 - Event Title.mkv')
 
         self.assertIsNotNone(imageSpecs)

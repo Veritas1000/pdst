@@ -2,6 +2,8 @@ import os
 import unittest
 from unittest.mock import patch
 
+from parameterized import parameterized
+
 from pdst.image.ImageMatcher import ImageMatcher
 
 
@@ -158,3 +160,30 @@ class TestImageMatcher(unittest.TestCase):
 
         logo = self.matcher.findBestMatch('Tampa Bay Buccaneers', 'Season 2020', 'NFL Football (2020)')
         self.assertEqual(None, logo)
+
+    @parameterized.expand([
+        (['Test.png'], 'Test', 'Test.png'),
+
+        (['Florida_Atlantic_FAU_Owls.png', 'Florida_Gators.png', 'Florida_State_Seminoles.png'],
+            'Florida', 'Florida_Gators.png'),
+
+        (['Florida_Atlantic_FAU_Owls.png', 'Florida_Gators.png', 'Florida_State_Seminoles.png'],
+            'Florida State', 'Florida_State_Seminoles.png'),
+
+        (['Florida_Atlantic_FAU_Owls.png', 'Florida_Gators.png', 'Florida_State_Seminoles.png'],
+            'FSU Seminoles', 'Florida_State_Seminoles.png'),
+
+        (['Florida_Atlantic_FAU_Owls.png', 'Florida_Gators.png', 'Florida_State_Seminoles.png'],
+            'FAU Owls', 'Florida_Atlantic_FAU_Owls.png'),
+    ])
+    @patch('pdst.image.ImageMatcher.filetools')
+    def test_findBestMatch_multiple_teams(self, logos, searchName, expectedImg, mock_filetools):
+        mock_filetools.getSubdirs.side_effect = [
+            ['Sport'],  # top level dirs
+            [],  # season level dirs
+        ]
+        mock_filetools.getImageFilesInDir.return_value = logos
+
+        logo = self.matcher.findBestMatch(searchName, 'Season', 'Sport')
+        expected = os.path.join('/fakeRoot', 'Sport', expectedImg)
+        self.assertEqual(expected, logo)

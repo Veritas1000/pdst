@@ -1,6 +1,7 @@
 from PIL import ImageColor
 
 from pdst import parsing
+from pdst.image import util
 
 
 class ImageSpec:
@@ -9,23 +10,30 @@ class ImageSpec:
         self.imageFile = imageFile
         self.isLogo = isLogo
 
-        # TODO: move the filename parsing logic from LogoDrawCfg to here
+        if imageFile is not None and isLogo:
+            if colors is None or len(colors) == 0:
+                colors = util.getColorsForImage(imageFile)
+
+            if bg is None:
+                bg = parsing.getBgPatternHint(imageFile)
+
+            if invert is None:
+                invert = parsing.isColorInverted(imageFile)
+
+            if strokeSpec is None:
+                size, color = parsing.getStrokeHint(imageFile)
+                if size is not None and color is not None:
+                    strokeSpec = StrokeSpec(size, color)
+
+            if maskSpec is None:
+                maskHint = parsing.getMaskHint(imageFile)
+                if maskHint is not None:
+                    maskSpec = ColorOverlaySpec(maskHint)
+
         self.colors = colors
         self.bg = bg
         self.invert = invert
-
-        if strokeSpec is None and imageFile is not None:
-            size, color = parsing.getStrokeHint(imageFile)
-            if size is not None and color is not None:
-                strokeSpec = StrokeSpec(size, color)
-
         self.strokeSpec = strokeSpec
-
-        if maskSpec is None and imageFile is not None:
-            maskHint = parsing.getMaskHint(imageFile)
-            if maskHint is not None:
-                maskSpec = ColorOverlaySpec(maskHint)
-
         self.maskSpec = maskSpec
 
     def override(self, other):

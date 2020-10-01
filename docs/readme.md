@@ -74,7 +74,7 @@ create thumbnails from.
 
 Should be a list of objects configuring different sports, where each entry can contain the following:
 
-### `name` *required*
+### `sport:name` *required*
 
 The name of the sport/league/etc.
 
@@ -89,7 +89,7 @@ match `Formula.1`, `formula_1`, and `FORMULA-1`. The match strings are treated m
 matches in that they are not expected to be the alone, so 'Formula 1' would match against the longer 
 string 'FIA Formula 1 Racing'.
 
-### `overrideShow`
+### `sport:overrideShow`
 
 `overrideShow` can go at either the sport level or in a [match object](#match-object).
 
@@ -105,7 +105,7 @@ there were multiple separate 'shows' that I wanted to combine under a single Ple
 each of those shows' episodes will have its show name consistently set to 'UEFA Nations League' when performing 
 a meatadata export or move
 
-### `dateOverride`
+### `sport:dateOverride`
 
 I kept running into a problem where EPG data had the wrong air date for a show, and at least for me when this 
 happened the wrong date was almost always set to December 31. Setting `dateOverride` lets you control the circumstances where an
@@ -121,28 +121,28 @@ If set to `NEVER`, there will never be any change to whatever EPG/metadata there
 If set to `EOY`, if the EPG/metadata air date for an episode is December 31, it will be ignored and the recorded 
 date will be used instead.
 
-### `imageRoot`
+### `sport:imageRoot`
 
 The root directory to use when searching for team logos. Any subdirectories will also be searched when looking 
 for logo images.
 
-### `image`
+### `sport:image`
 
 A specific image to use as the 'generated' thumbnail. Usually only one of `image` or `imageRoot` will be used 
 for a given sport entry. You might use `image` instead of `imageRoot` for a sport such as racing where there aren't 
 really 'teams', but you still want to have a thumbnail that isn't a video still.
 
-### `background`
+### `sport:background`
 
 Set a sport-level [background style hint](generate.md#background-filename-hinting). 
 
-### `imageTextRegex`
+### `sport:imageTextRegex`
 
 Optional regex that can be used to extract text from an episode title to use when generating the image.
 
 The matching group (if any) is used in thumbnail generation as if it were passed in with a [`--text` argument](generate.md#--text) 
 
-### `matches`
+### `sport:matches`
 
 An optional collection of strings or objects that will be used to match for the sport instead of the sport `name`.
 
@@ -224,3 +224,10 @@ The root folder of the destination media library that `move` should use when mov
 ## `umask`
 
 Sets the permissions umask when creating files/directories
+
+## `preventSimilarColors`
+
+Is `true`, checks background colors of the team parts when generating a match image, and if the two BG colors are very 
+similar, will try to find an alternate bg color for the second image to increase the contrast.
+
+Default is `true`
